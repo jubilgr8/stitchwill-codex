@@ -1,5 +1,5 @@
-import React from 'react';
-import { TouchableOpacity, Image, View, Text, ImageSourcePropType } from 'react-native';
+import React, { useRef } from 'react';
+import { Animated, Easing, TouchableOpacity, Image, View, ImageSourcePropType } from 'react-native';
 import styled from 'styled-components/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import theme from '../theme';
@@ -11,11 +11,16 @@ interface FeatureCardProps {
   imageUrl?: ImageSourcePropType;
   icon?: string; // Icon name for MaterialCommunityIcons
   onPress: () => void;
+  isFirst?: boolean;
 }
 
-const CardContainer = styled.TouchableOpacity`
+const CardContainer = styled.TouchableOpacity<{ isFirst?: boolean }>`
   height: 120px;
-  margin: 0 ${({ theme }) => theme.spacing.s4}px ${({ theme }) => theme.spacing.s4}px;
+  margin-top: ${({ isFirst, theme }) =>
+    isFirst ? theme.spacing.s5 : 0}px;
+  margin-right: ${({ theme }) => theme.spacing.s4}px;
+  margin-bottom: ${({ theme }) => theme.spacing.s4}px;
+  margin-left: ${({ theme }) => theme.spacing.s4}px;
   border-radius: ${({ theme }) => theme.radii.card}px;
   background-color: ${({ theme }) => theme.colors.background};
   flex-direction: row;
@@ -65,14 +70,41 @@ const CardRightIcon = styled.View`
   height: 24px;
 `;
 
-const FeatureCard = ({ id, title, subtitle, imageUrl, icon, onPress }: FeatureCardProps) => {
+const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
+
+const FeatureCard = ({ id, title, subtitle, imageUrl, icon, onPress, isFirst }: FeatureCardProps) => {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.timing(scaleAnim, {
+      toValue: 0.97,
+      duration: 120,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.timing(scaleAnim, {
+      toValue: 1,
+      duration: 120,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: true,
+    }).start();
+  };
+
   return (
-    <CardContainer 
-      activeOpacity={0.97}
+    <CardContainer
+      as={AnimatedTouchable}
+      style={{ transform: [{ scale: scaleAnim }] }}
+      activeOpacity={1}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       onPress={onPress}
       accessible={true}
       accessibilityLabel={`${title}. ${subtitle}. Button.`}
       accessibilityRole="button"
+      isFirst={isFirst}
     >
       {imageUrl ? (
         <CardImage source={imageUrl} />

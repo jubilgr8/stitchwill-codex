@@ -76,7 +76,7 @@ export default function FeedScreen() {
           Hello, Jane!
         </GreetingHeader>
 
-        {featureCards.map((card) => (
+        {featureCards.map((card, index) => (
           <FeatureCard
             key={card.id}
             id={card.id}
@@ -84,6 +84,7 @@ export default function FeedScreen() {
             subtitle={card.subtitle}
             icon={card.icon}
             onPress={() => handleFeatureCardPress(card.navigateTo)}
+            isFirst={index === 0}
           />
         ))}
 
